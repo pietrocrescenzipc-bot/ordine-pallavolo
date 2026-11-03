@@ -91,7 +91,7 @@
                 </div>
                 <h3 class="hidden md:block font-black text-xs uppercase tracking-wider text-slate-400 mb-3">Categorie</h3>
                 <div id="sidebar-category-list" class="space-y-3 overflow-y-auto flex-1 pr-1 no-scrollbar">
-                    <!-- Generato via JS con stile grande e tridimensionale -->
+                    <!-- Generato via JS con pulsanti colorati fissi, maiuscoli e grandi -->
                 </div>
             </aside>
 
@@ -107,7 +107,7 @@
                     </div>
                     <span class="text-[11px] font-bold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-xl border border-sky-100">Tocca per variare</span>
                 </div>
-                <!-- BORDO FISSO SEMPRE ATTIVO E BLU CHIARO -->
+                <!-- CATALOGO PRODOTTI -->
                 <div id="products-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-24">
                     <!-- Generato via JS -->
                 </div>
@@ -490,7 +490,7 @@
             renderProducts(activeCategoryIndex);
         }
 
-        // Renderizza il menu laterale con pulsanti 3D grandi e blu chiaro (tutti uguali)
+        // Renderizza il menu laterale con pulsanti fissi colorati in blu chiaro, GRASSI e TUTTI MAIUSCOLI
         function renderSidebar() {
             const list = document.getElementById("sidebar-category-list");
             list.innerHTML = "";
@@ -499,9 +499,11 @@
                 btn.type = "button";
                 
                 if (index === activeCategoryIndex) {
-                    btn.className = "w-full text-left px-5 py-4 rounded-2xl text-sm font-black transition flex justify-between items-center cursor-pointer bg-sky-600 text-white shadow-inner border-2 border-sky-700 transform scale-[0.98]";
+                    // Categoria selezionata: Blu chiaro intenso, rientrata, con bordo marcato
+                    btn.className = "w-full text-left px-5 py-4 rounded-2xl text-sm font-black uppercase tracking-wide transition flex justify-between items-center cursor-pointer bg-sky-600 text-white shadow-inner border-2 border-sky-700 transform scale-[0.98]";
                 } else {
-                    btn.className = "w-full text-left px-5 py-4 rounded-2xl text-sm font-bold transition flex justify-between items-center cursor-pointer bg-white text-slate-800 border-2 border-slate-200 shadow-md hover:border-sky-400 hover:bg-sky-50/50 active:scale-95";
+                    // Categorie non selezionate: Rimangono colorate di blu chiaro leggero e fisso con scritta in grassetto maiuscola
+                    btn.className = "w-full text-left px-5 py-4 rounded-2xl text-sm font-black uppercase tracking-wide transition flex justify-between items-center cursor-pointer bg-sky-100/90 text-sky-900 border-2 border-sky-200 shadow-sm hover:bg-sky-200 active:scale-95";
                 }
 
                 btn.innerHTML = `<span>${cat.category}</span> <i class="fa-solid fa-chevron-right text-xs opacity-60"></i>`;
