@@ -100,7 +100,7 @@
 
             <!-- CATALOGO PRODOTTI -->
             <main class="flex-1 w-full">
-                <!-- BANNER ORDINE ATTIVO (SE GIA INVIATO) -->
+                <!-- BANNER ORDINE ATTIVO -->
                 <div id="active-order-banner" class="hidden mb-4 p-4 bg-emerald-50 border-2 border-emerald-300 rounded-2xl flex justify-between items-center shadow-xs">
                     <div>
                         <span class="text-[10px] font-black text-emerald-700 uppercase tracking-widest block">Stato Ordine</span>
@@ -708,7 +708,11 @@
 
         function updateExistingOrder() {
             if(!activeOrderId) return submitOrder();
-            if(cart.length === 0) return cancelExistingOrder();
+            
+            // SE IL CARRELLO È STATO SVUOTATO DEL TUTTO, CANCELLA DIRETTAMENTE L'ORDINE SU FIREBASE
+            if(cart.length === 0) {
+                return cancelExistingOrder();
+            }
 
             db.ref('restaurant_orders/' + activeOrderId).once('value', snapshot => {
                 const existingOrder = snapshot.val() || {};
