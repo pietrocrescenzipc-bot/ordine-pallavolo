@@ -91,7 +91,7 @@
                 </div>
                 <h3 class="hidden md:block font-black text-xs uppercase tracking-wider text-slate-400 mb-3">Categorie</h3>
                 <div id="sidebar-category-list" class="space-y-3 overflow-y-auto flex-1 pr-1 no-scrollbar">
-                    <!-- Generato via JS con pulsanti colorati fissi, maiuscoli e grandi -->
+                    <!-- Generato via JS -->
                 </div>
             </aside>
 
@@ -211,8 +211,10 @@
     <script>
         const WHATSAPP_REGIA_NUMBER = "393391318613";
 
-        const firebaseConfig = { databaseURL: "https://tombola-galleon-default-rtdb.firebaseio.com" };
-        firebase.initializeApp(firebaseConfig);
+        const firebaseConfig = { databaseURL: "https://ordine-pallavolo-default-rtdb.europe-west1.firebasedatabase.app" };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.database();
 
         const menuData = [
@@ -490,7 +492,6 @@
             renderProducts(activeCategoryIndex);
         }
 
-        // Renderizza il menu laterale con pulsanti fissi colorati in blu chiaro, GRASSI e TUTTI MAIUSCOLI
         function renderSidebar() {
             const list = document.getElementById("sidebar-category-list");
             list.innerHTML = "";
@@ -499,10 +500,8 @@
                 btn.type = "button";
                 
                 if (index === activeCategoryIndex) {
-                    // Categoria selezionata: Blu chiaro intenso, rientrata, con bordo marcato
                     btn.className = "w-full text-left px-5 py-4 rounded-2xl text-sm font-black uppercase tracking-wide transition flex justify-between items-center cursor-pointer bg-sky-600 text-white shadow-inner border-2 border-sky-700 transform scale-[0.98]";
                 } else {
-                    // Categorie non selezionate: Rimangono colorate di blu chiaro leggero e fisso con scritta in grassetto maiuscola
                     btn.className = "w-full text-left px-5 py-4 rounded-2xl text-sm font-black uppercase tracking-wide transition flex justify-between items-center cursor-pointer bg-sky-100/90 text-sky-900 border-2 border-sky-200 shadow-sm hover:bg-sky-200 active:scale-95";
                 }
 
@@ -628,6 +627,9 @@
                     <button type="button" onclick="updateExistingOrder()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-black py-4 rounded-2xl transition shadow-lg shadow-emerald-600/30 text-sm uppercase tracking-wider cursor-pointer">
                         Aggiorna Ordine in Regia 🔄
                     </button>
+                    <button type="button" onclick="cancelExistingOrder()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 active:scale-[0.98] font-bold py-3 rounded-2xl transition text-xs uppercase tracking-wider cursor-pointer border border-red-200">
+                        Annulla e Cancella Ordine 🗑️
+                    </button>
                 `;
             } else {
                 actionContainer.innerHTML = `
@@ -672,38 +674,67 @@
             const newOrder = {
                 id: newOrderId,
                 client: currentUser,
-                items: [...cart],
+                items: JSON.parse(JSON.stringify(cart)),
                 total: cart.reduce((sum, item) => sum + (item.price * item.qty), 0),
                 status: 'In attesa',
                 sentToWhatsApp: false,
+                isModified: false,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
 
-            db.ref('restaurant_orders/' + newOrderId).set(newOrder).then(() => {
-                activeOrderId = newOrderId;
-                closeCart();
-                alert("Ordine inviato con successo alla Regia!");
-            }).catch(err => {
-                alert("Errore di invio, riprova.");
-            });
+            db.ref('restaurant_orders/' + newOrderId).set(newOrder)
+                .then(() => {
+                    activeOrderId = newOrderId;
+                    closeCart();
+                    alert("Ordine inviato con successo alla Regia! 🚀");
+                })
+                .catch(err => {
+                    alert("Errore di invio Firebase: " + err.message);
+                });
         }
 
         function updateExistingOrder() {
             if(!activeOrderId) return submitOrder();
-            if(cart.length === 0) return alert("Il carrello è vuoto!");
+            if(cart.length === 0) return cancelExistingOrder();
 
             const updatedData = {
-                items: [...cart],
+                items: JSON.parse(JSON.stringify(cart)),
                 total: cart.reduce((sum, item) => sum + (item.price * item.qty), 0),
-                sentToWhatsApp: false
+                sentToWhatsApp: false,
+                isModified: true // Segna l'ordine come modificato per la Regia
             };
 
-            db.ref('restaurant_orders/' + activeOrderId).update(updatedData).then(() => {
+            db.ref('restaurant_orders/' + activeOrderId).update(updatedData)
+                .then(() => {
+                    closeCart();
+                    alert("Ordine aggiornato in tempo reale con la Regia! 🔄");
+                })
+                .catch(err => {
+                    alert("Errore nell'aggiornamento: " + err.message);
+                });
+        }
+
+        function cancelExistingOrder() {
+            if(!activeOrderId) {
+                cart = [];
+                updateCartCount();
                 closeCart();
-                alert("Ordine aggiornato in tempo reale con la Regia! 🔄");
-            }).catch(err => {
-                alert("Errore nell'aggiornamento.");
-            });
+                return;
+            }
+
+            if(confirm("Sei sicuro di voler cancellare definitivamente questo ordine?")) {
+                db.ref('restaurant_orders/' + activeOrderId).remove()
+                    .then(() => {
+                        activeOrderId = null;
+                        cart = [];
+                        updateCartCount();
+                        closeCart();
+                        alert("Ordine cancellato con successo.");
+                    })
+                    .catch(err => {
+                        alert("Errore nella cancellazione: " + err.message);
+                    });
+            }
         }
 
         function loadRegiaOrders() {
@@ -717,15 +748,38 @@
                 }
 
                 grid.innerHTML = "";
-                const orders = Object.values(data).reverse();
+                let orders = [];
+                
+                try {
+                    if (Array.isArray(data)) {
+                        orders = data.filter(o => o && o.items && Array.isArray(o.items));
+                    } else if (typeof data === 'object') {
+                        orders = Object.values(data).filter(o => o && o.items && Array.isArray(o.items)).reverse();
+                    }
+                } catch(e) {
+                    console.error("Errore di parsing dei dati:", e);
+                }
+
+                if (orders.length === 0) {
+                    grid.innerHTML = `<p class="text-center text-slate-400 col-span-full py-16 font-medium text-sm">Nessun ordine valido nel database.</p>`;
+                    return;
+                }
 
                 orders.forEach((order) => {
                     const card = document.createElement("div");
                     const isSent = order.sentToWhatsApp;
-                    const cardBorderClass = isSent ? "border-2 border-emerald-400 bg-white" : "border-4 border-amber-500 bg-amber-50/30 shadow-md";
+                    const isMod = order.isModified;
+                    
+                    let cardBorderClass = isSent ? "border-2 border-emerald-400 bg-white" : "border-4 border-amber-500 bg-amber-50/30 shadow-md";
+                    if(isMod) cardBorderClass = "border-4 border-purple-500 bg-purple-50/30 shadow-lg"; // Evidenzia se modificato
+
                     const statusBadge = isSent 
                         ? `<span class="bg-emerald-100 text-emerald-700 text-[10px] font-black px-2.5 py-1 rounded-full"><i class="fa-brands fa-whatsapp"></i> Inviato a WhatsApp</span>`
                         : `<span class="bg-amber-100 text-amber-800 text-[10px] font-black px-2.5 py-1 rounded-full animate-pulse"><i class="fa-solid fa-triangle-exclamation"></i> Da Inviare a WhatsApp</span>`;
+
+                    const modBadge = isMod 
+                        ? `<span class="bg-purple-100 text-purple-700 text-[10px] font-black px-2.5 py-1 rounded-full ml-1"><i class="fa-solid fa-pen-to-square"></i> MODIFICATO</span>` 
+                        : '';
 
                     card.className = `rounded-3xl p-5 flex flex-col justify-between ${cardBorderClass}`;
                     
@@ -734,8 +788,8 @@
                         return `
                             <div class="text-xs py-1.5 border-b border-slate-100 last:border-none">
                                 <div class="flex justify-between font-bold text-slate-800">
-                                    <span>${i.qty}x ${i.name}</span>
-                                    <span>€ ${(i.price * i.qty).toFixed(2)}</span>
+                                    <span>${i.qty || 1}x ${i.name || 'Prodotto'}</span>
+                                    <span>€ ${( (i.price || 0) * (i.qty || 1) ).toFixed(2)}</span>
                                 </div>
                                 ${noteBlock}
                             </div>
@@ -746,8 +800,8 @@
                         <div>
                             <div class="flex justify-between items-start mb-2">
                                 <div>
-                                    <span class="text-[10px] font-black text-slate-400">${order.id} • ${order.time}</span>
-                                    <h3 class="font-black text-lg text-slate-900">${order.client}</h3>
+                                    <span class="text-[10px] font-black text-slate-400">${order.id || 'ORD'} • ${order.time || ''}</span>
+                                    <h3 class="font-black text-lg text-slate-900">${order.client || 'Ospite'}</h3>
                                 </div>
                                 <select onchange="updateOrderStatus('${order.id}', this.value)" class="text-xs font-bold px-3 py-2 rounded-xl border border-slate-200 bg-white focus:outline-none shadow-xs cursor-pointer">
                                     <option value="In attesa" ${order.status === 'In attesa' ? 'selected' : ''}>In attesa</option>
@@ -756,18 +810,20 @@
                                     <option value="Inviato" ${order.status === 'Inviato' ? 'selected' : ''}>Inviato</option>
                                 </select>
                             </div>
-                            <div class="mb-3">${statusBadge}</div>
+                            <div class="mb-3 flex flex-wrap gap-1">${statusBadge} ${modBadge}</div>
                             <div class="my-3 space-y-1 bg-white p-3.5 rounded-2xl max-h-44 overflow-y-auto border border-slate-100">
                                 ${itemsHtml}
                             </div>
                         </div>
                         <div class="flex justify-between font-black text-slate-900 pt-3 border-t border-slate-100 text-sm items-center">
                             <span>Totale:</span>
-                            <span class="text-sky-600 text-base">€ ${order.total.toFixed(2)}</span>
+                            <span class="text-sky-600 text-base">€ ${order.total ? order.total.toFixed(2) : '0.00'}</span>
                         </div>
                     `;
                     grid.appendChild(card);
                 });
+            }, error => {
+                console.error("Errore di connessione Firebase Realtime:", error);
             });
         }
 
@@ -776,11 +832,9 @@
         }
 
         function clearAllOrders() {
-            if(confirm("Sei sicuro di voler azzerare ed eliminare TUTTI gli ordini dalla Regia? L'operazione è irreversibile.")) {
+            if(confirm("Sei sicuro di voler azzerare ed eliminare TUTTI gli ordini dalla Regia?")) {
                 db.ref('restaurant_orders').remove().then(() => {
                     alert("Tutti gli ordini sono stati azzerati con successo!");
-                }).catch(err => {
-                    alert("Errore durante l'azzeramento.");
                 });
             }
         }
@@ -790,18 +844,24 @@
                 const data = snapshot.val();
                 if(!data) return alert("Nessun ordine presente.");
 
-                const orders = Object.values(data);
+                let orders = [];
+                if (Array.isArray(data)) {
+                    orders = data.filter(o => o && o.items);
+                } else if (typeof data === 'object') {
+                    orders = Object.values(data).filter(o => o && o.items);
+                }
+
                 const pendingOrders = orders.filter(o => !o.sentToWhatsApp);
 
                 if(pendingOrders.length === 0) {
-                    return alert("Tutti gli ordini presenti sono già stati inviati su WhatsApp in precedenza! Nessun nuovo ordine da inviare.");
+                    return alert("Tutti gli ordini presenti sono già stati inviati su WhatsApp!");
                 }
 
                 let text = `*RIEPILOGO ORDINI ASPORTO*%0A`;
                 
                 pendingOrders.forEach(order => {
                     text += `%0A-----------------------------------%0A`;
-                    text += `Cliente: *${order.client}* (${order.time})%0A`;
+                    text += `Cliente: *${order.client}* (${order.time}) ${order.isModified ? '[MODIFICATO]' : ''}%0A`;
                     text += `-----------------------------------%0A`;
                     order.items.forEach(i => {
                         text += `• ${i.qty}x ${i.name}%0A`;
