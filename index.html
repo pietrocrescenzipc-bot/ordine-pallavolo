@@ -100,6 +100,14 @@
 
             <!-- CATALOGO PRODOTTI -->
             <main class="flex-1 w-full">
+                <!-- BANNER ORDINE ATTIVO (SE GIA INVIATO) -->
+                <div id="active-order-banner" class="hidden mb-4 p-4 bg-emerald-50 border-2 border-emerald-300 rounded-2xl flex justify-between items-center shadow-xs">
+                    <div>
+                        <span class="text-[10px] font-black text-emerald-700 uppercase tracking-widest block">Stato Ordine</span>
+                        <p class="text-xs font-bold text-emerald-900">Hai un ordine attivo in corso. Puoi aggiungere altri piatti o modificare il carrello!</p>
+                    </div>
+                </div>
+
                 <div class="mb-4 flex justify-between items-center px-4 py-3 bg-white rounded-2xl border border-slate-200/60 shadow-2xs">
                     <div>
                         <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Categoria</span>
@@ -171,6 +179,9 @@
                         Invia Ordine alla Regia 🚀
                     </button>
                 </div>
+                <button type="button" onclick="closeCart()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-2xl transition text-xs uppercase tracking-wider cursor-pointer">
+                    🍕 Torna a Sfogliare il Menu
+                </button>
             </div>
         </div>
     </div>
@@ -686,8 +697,9 @@
             db.ref('restaurant_orders/' + newOrderId).set(newOrder)
                 .then(() => {
                     activeOrderId = newOrderId;
+                    document.getElementById("active-order-banner").classList.remove("hidden");
                     closeCart();
-                    alert("Ordine inviato con successo alla Regia! 🚀");
+                    alert("Ordine inviato con successo alla Regia! 🚀 Puoi continuare a ordinare se vuoi.");
                 })
                 .catch(err => {
                     alert("Errore di invio Firebase: " + err.message);
@@ -698,13 +710,11 @@
             if(!activeOrderId) return submitOrder();
             if(cart.length === 0) return cancelExistingOrder();
 
-            // Leggi l'ordine esistente su Firebase per calcolare cosa è stato tolto
             db.ref('restaurant_orders/' + activeOrderId).once('value', snapshot => {
                 const existingOrder = snapshot.val() || {};
                 let existingCancelled = existingOrder.cancelledItems || [];
                 const oldItems = existingOrder.items || [];
 
-                // Confronta la vecchia lista con il nuovo carrello per trovare i prodotti cancellati o ridotti
                 oldItems.forEach(oldItem => {
                     const newItem = cart.find(i => i.name === oldItem.name);
                     if (!newItem) {
@@ -745,6 +755,7 @@
                 db.ref('restaurant_orders/' + activeOrderId).remove()
                     .then(() => {
                         activeOrderId = null;
+                        document.getElementById("active-order-banner").classList.add("hidden");
                         cart = [];
                         updateCartCount();
                         closeCart();
@@ -802,7 +813,6 @@
 
                     card.className = `rounded-3xl p-5 flex flex-col justify-between ${cardBorderClass}`;
                     
-                    // Renderizza i prodotti attivi
                     let itemsHtml = order.items.map(i => {
                         let noteBlock = i.notes ? `<p class="text-[11px] text-sky-600 bg-sky-50 px-2 py-0.5 rounded-md mt-1 inline-block font-semibold">Var: ${i.notes}</p>` : '';
                         return `
@@ -816,7 +826,6 @@
                         `;
                     }).join('');
 
-                    // Renderizza i prodotti cancellati (se presenti) in un box rosso dedicato
                     let cancelledHtml = '';
                     if (order.cancelledItems && order.cancelledItems.length > 0) {
                         let cancelledList = order.cancelledItems.map(i => `
