@@ -71,7 +71,7 @@
                         <span id="cart-count" class="bg-white text-sky-600 text-xs w-5 h-5 rounded-full flex items-center justify-center font-black shadow-inner">0</span>
                     </button>
                     <button type="button" onclick="switchToRegia()" class="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-3 rounded-2xl text-xs font-black transition flex items-center gap-1.5 shadow-xs active:scale-95 cursor-pointer" title="Il Capitano in Regia">
-                        <i class="fa-solid fa-desktop text-sm"></i> <span class="hidden sm:inline">Capitano in Regia</span>
+                        <i class="fa-solid fa-desktop text-sm"></i> <span class="hidden sm:inline">Il Capitano in Regia</span>
                     </button>
                     <button type="button" onclick="logoutClient()" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-3 rounded-2xl text-xs font-bold transition border border-red-200 flex items-center justify-center active:scale-95 cursor-pointer" title="Esci">
                         <i class="fa-solid fa-right-from-bracket text-sm"></i>
@@ -136,7 +136,7 @@
                         <i class="fa-brands fa-whatsapp text-sm"></i> Invia a WhatsApp 📱
                     </button>
                     <button type="button" onclick="clearAllOrders()" class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md active:scale-95 cursor-pointer">
-                        <i class="fa-solid fa-trash text-sm"></i> Azzera 🗑️
+                        <i class="fa-solid fa-trash text-sm"></i> Azzera Tutti 🗑️
                     </button>
                     <button type="button" onclick="switchToClient()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition active:scale-95 cursor-pointer">
                         Menu
@@ -176,7 +176,7 @@
                 </div>
                 <div id="cart-action-buttons" class="space-y-2">
                     <button type="button" onclick="submitOrder()" class="w-full bg-sky-600 hover:bg-sky-700 active:scale-[0.98] text-white font-black py-4 rounded-2xl transition shadow-lg shadow-sky-600/30 text-sm uppercase tracking-wider cursor-pointer">
-                        Invia Ordine alla Regia 🚀
+                        Invia Ordine al Capitano in Regia 🚀
                     </button>
                 </div>
                 <button type="button" onclick="closeCart()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-2xl transition text-xs uppercase tracking-wider cursor-pointer">
@@ -645,7 +645,7 @@
             } else {
                 actionContainer.innerHTML = `
                     <button type="button" onclick="submitOrder()" class="w-full bg-sky-600 hover:bg-sky-700 active:scale-[0.98] text-white font-black py-4 rounded-2xl transition shadow-lg shadow-sky-600/30 text-sm uppercase tracking-wider cursor-pointer">
-                        Invia Ordine alla Regia 🚀
+                        Invia Ordine al Capitano in Regia 🚀
                     </button>
                 `;
             }
@@ -699,7 +699,7 @@
                     activeOrderId = newOrderId;
                     document.getElementById("active-order-banner").classList.remove("hidden");
                     closeCart();
-                    alert("Ordine inviato con successo alla Regia! 🚀 Puoi continuare a ordinare se vuoi.");
+                    alert("Ordine inviato con successo a Il Capitano in Regia! 🚀 Puoi continuare a ordinare se vuoi.");
                 })
                 .catch(err => {
                     alert("Errore di invio Firebase: " + err.message);
@@ -709,7 +709,6 @@
         function updateExistingOrder() {
             if(!activeOrderId) return submitOrder();
             
-            // SE IL CARRELLO È STATO SVUOTATO COMPLETAMENTE (ANCHE 1 SOLO PRODOTTO)
             if(cart.length === 0) {
                 return cancelExistingOrder();
             }
@@ -739,7 +738,7 @@
                 db.ref('restaurant_orders/' + activeOrderId).update(updatedData)
                     .then(() => {
                         closeCart();
-                        alert("Ordine aggiornato in tempo reale con la Regia! 🔄");
+                        alert("Ordine aggiornato in tempo reale con Il Capitano in Regia! 🔄");
                     })
                     .catch(err => {
                         alert("Errore nell'aggiornamento: " + err.message);
@@ -854,12 +853,17 @@
                                     <span class="text-[10px] font-black text-slate-400">${order.id || 'ORD'} • ${order.time || ''}</span>
                                     <h3 class="font-black text-lg text-slate-900">${order.client || 'Ospite'}</h3>
                                 </div>
-                                <select onchange="updateOrderStatus('${order.id}', this.value)" class="text-xs font-bold px-3 py-2 rounded-xl border border-slate-200 bg-white focus:outline-none shadow-xs cursor-pointer">
-                                    <option value="In attesa" ${order.status === 'In attesa' ? 'selected' : ''}>In attesa</option>
-                                    <option value="In preparazione" ${order.status === 'In preparazione' ? 'selected' : ''}>In preparazione</option>
-                                    <option value="Pronto" ${order.status === 'Pronto' ? 'selected' : ''}>Pronto</option>
-                                    <option value="Inviato" ${order.status === 'Inviato' ? 'selected' : ''}>Inviato</option>
-                                </select>
+                                <div class="flex items-center gap-1.5">
+                                    <select onchange="updateOrderStatus('${order.id}', this.value)" class="text-xs font-bold px-2.5 py-2 rounded-xl border border-slate-200 bg-white focus:outline-none shadow-xs cursor-pointer">
+                                        <option value="In attesa" ${order.status === 'In attesa' ? 'selected' : ''}>In attesa</option>
+                                        <option value="In preparazione" ${order.status === 'In preparazione' ? 'selected' : ''}>In preparazione</option>
+                                        <option value="Pronto" ${order.status === 'Pronto' ? 'selected' : ''}>Pronto</option>
+                                        <option value="Inviato" ${order.status === 'Inviato' ? 'selected' : ''}>Inviato</option>
+                                    </select>
+                                    <button type="button" onclick="deleteSingleOrder('${order.id}', '${order.client}')" class="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-xl border border-red-200 transition active:scale-95 cursor-pointer" title="Elimina questo ordine">
+                                        <i class="fa-solid fa-trash text-sm"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="mb-3 flex flex-wrap gap-1">${statusBadge} ${modBadge}</div>
                             <div class="my-3 space-y-1 bg-white p-3.5 rounded-2xl max-h-44 overflow-y-auto border border-slate-100">
@@ -883,8 +887,21 @@
             db.ref('restaurant_orders/' + orderId + '/status').set(newStatus);
         }
 
+        // Funzione per eliminare 1 singolo ordine dalla Regia
+        function deleteSingleOrder(orderId, clientName) {
+            if(confirm(`Sei sicuro di voler eliminare l'ordine di ${clientName} (${orderId})?`)) {
+                db.ref('restaurant_orders/' + orderId).remove()
+                    .then(() => {
+                        // Nessun alert invasivo, l'ordine scompare all'istante dalla Regia in tempo reale
+                    })
+                    .catch(err => {
+                        alert("Errore nella cancellazione: " + err.message);
+                    });
+            }
+        }
+
         function clearAllOrders() {
-            if(confirm("Sei sicuro di voler azzerare ed eliminare TUTTI gli ordini dalla Regia?")) {
+            if(confirm("Sei sicuro di voler azzerare ed eliminare TUTTI gli ordini da Il Capitano in Regia?")) {
                 db.ref('restaurant_orders').remove().then(() => {
                     alert("Tutti gli ordini sono stati azzerati con successo!");
                 });
@@ -909,7 +926,6 @@
                     return alert("Tutti gli ordini presenti sono già stati inviati su WhatsApp!");
                 }
 
-                // POPUP DI CONFERMA WHATSAPP
                 if (!confirm("Sei sicura che tutti hanno ordinato?")) {
                     return;
                 }
@@ -936,14 +952,16 @@
                 
                 text += `%0A-----------------------------------`;
 
-                window.open(`https://wa.me/${WHATSAPP_REGIA_NUMBER}?text=${text}`, '_blank');
-
                 const updates = {};
                 pendingOrders.forEach(order => {
                     updates[order.id + '/sentToWhatsApp'] = true;
                 });
 
-                db.ref('restaurant_orders').update(updates);
+                db.ref('restaurant_orders').update(updates).then(() => {
+                    window.open(`https://wa.me/${WHATSAPP_REGIA_NUMBER}?text=${text}`, '_blank');
+                }).catch(err => {
+                    alert("Errore nell'aggiornamento dello stato WhatsApp: " + err.message);
+                });
             });
         }
     </script>
