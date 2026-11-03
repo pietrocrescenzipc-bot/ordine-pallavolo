@@ -123,7 +123,7 @@
         </div>
     </div>
 
-    <!-- DASHBOARD REGIA (IL CAPITANO IN REGIA) -->
+    <!-- DASHBOARD IL CAPITANO IN REGIA -->
     <div id="regia-app" class="hidden min-h-screen bg-slate-100 flex flex-col">
         <header class="bg-slate-900 text-white shadow-md sticky top-0 z-30">
             <div class="max-w-5xl mx-auto px-4 py-3.5 flex justify-between items-center">
@@ -709,7 +709,7 @@
         function updateExistingOrder() {
             if(!activeOrderId) return submitOrder();
             
-            // SE IL CARRELLO È STATO SVUOTATO COMPLETAMENTE, CANCELLA SUBITO L'ORDINE
+            // SE IL CARRELLO È STATO SVUOTATO COMPLETAMENTE (ANCHE 1 SOLO PRODOTTO)
             if(cart.length === 0) {
                 return cancelExistingOrder();
             }
@@ -909,7 +909,7 @@
                     return alert("Tutti gli ordini presenti sono già stati inviati su WhatsApp!");
                 }
 
-                // CONTROLLO DI CONFERMA WHATSAPP RICHIESTO
+                // POPUP DI CONFERMA WHATSAPP
                 if (!confirm("Sei sicura che tutti hanno ordinato?")) {
                     return;
                 }
