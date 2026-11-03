@@ -709,7 +709,7 @@
         function updateExistingOrder() {
             if(!activeOrderId) return submitOrder();
             
-            // SE IL CARRELLO È STATO SVUOTATO COMPLETAMENTE (ANCHE PARTENDO DA 1 SOLO PRODOTTO)
+            // SE IL CARRELLO È STATO SVUOTATO COMPLETAMENTE, CANCELLA SUBITO L'ORDINE
             if(cart.length === 0) {
                 return cancelExistingOrder();
             }
@@ -909,9 +909,9 @@
                     return alert("Tutti gli ordini presenti sono già stati inviati su WhatsApp!");
                 }
 
-                // MESSAGGIO DI CONFERMA RICHIESTO
+                // CONTROLLO DI CONFERMA WHATSAPP RICHIESTO
                 if (!confirm("Sei sicura che tutti hanno ordinato?")) {
-                    return; // Annulla l'invio se preme Annulla
+                    return;
                 }
 
                 let text = `*RIEPILOGO ORDINI SPOGLIATOIO*%0A`;
