@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PMU & The Galleon • Delivery & Asporto</title>
+    <title>PMU & The Galleon • Spogliatoio & Asporto</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -40,7 +40,7 @@
 
             <div class="mt-6 border-t border-slate-100 pt-4 flex justify-between items-center text-xs">
                 <button type="button" onclick="switchToRegia()" class="font-bold text-slate-500 hover:text-sky-600 transition flex items-center gap-1.5 cursor-pointer">
-                    <i class="fa-solid fa-desktop text-sm"></i> Area Regia / Staff
+                    <i class="fa-solid fa-desktop text-sm"></i> Il Capitano in Regia
                 </button>
                 <span class="text-emerald-600 font-bold flex items-center gap-1">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live
@@ -60,7 +60,7 @@
                         <span class="tracking-wider">MENU</span>
                     </button>
                     <div class="hidden sm:block">
-                        <span class="text-[9px] font-black text-sky-600 uppercase tracking-widest block leading-none mb-0.5">Asporto Online</span>
+                        <span class="text-[9px] font-black text-sky-600 uppercase tracking-widest block leading-none mb-0.5">Spogliatoio Online</span>
                         <h1 class="font-black text-sm sm:text-base text-slate-900 leading-tight">PMU & The Galleon</h1>
                     </div>
                 </div>
@@ -70,8 +70,8 @@
                         <span class="text-xs uppercase tracking-wider">Carrello</span>
                         <span id="cart-count" class="bg-white text-sky-600 text-xs w-5 h-5 rounded-full flex items-center justify-center font-black shadow-inner">0</span>
                     </button>
-                    <button type="button" onclick="switchToRegia()" class="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-3 rounded-2xl text-xs font-black transition flex items-center gap-1.5 shadow-xs active:scale-95 cursor-pointer" title="Regia">
-                        <i class="fa-solid fa-desktop text-sm"></i> <span class="hidden sm:inline">Regia</span>
+                    <button type="button" onclick="switchToRegia()" class="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-3 rounded-2xl text-xs font-black transition flex items-center gap-1.5 shadow-xs active:scale-95 cursor-pointer" title="Il Capitano in Regia">
+                        <i class="fa-solid fa-desktop text-sm"></i> <span class="hidden sm:inline">Capitano in Regia</span>
                     </button>
                     <button type="button" onclick="logoutClient()" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-3 rounded-2xl text-xs font-bold transition border border-red-200 flex items-center justify-center active:scale-95 cursor-pointer" title="Esci">
                         <i class="fa-solid fa-right-from-bracket text-sm"></i>
@@ -123,17 +123,17 @@
         </div>
     </div>
 
-    <!-- DASHBOARD REGIA -->
+    <!-- DASHBOARD REGIA (IL CAPITANO IN REGIA) -->
     <div id="regia-app" class="hidden min-h-screen bg-slate-100 flex flex-col">
         <header class="bg-slate-900 text-white shadow-md sticky top-0 z-30">
             <div class="max-w-5xl mx-auto px-4 py-3.5 flex justify-between items-center">
                 <div class="flex items-center gap-2.5">
                     <div class="bg-sky-600 p-2 rounded-xl text-white shadow-inner"><i class="fa-solid fa-desktop text-sm"></i></div>
-                    <h1 class="text-base font-black">Regia & Cucina (Live Sync)</h1>
+                    <h1 class="text-base font-black">Il Capitano in Regia (Live Sync)</h1>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
                     <button type="button" onclick="sendAllOrdersToWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md active:scale-95 cursor-pointer">
-                        <i class="fa-brands fa-whatsapp text-sm"></i> Invia Nuovi a WhatsApp 📱
+                        <i class="fa-brands fa-whatsapp text-sm"></i> Invia a WhatsApp 📱
                     </button>
                     <button type="button" onclick="clearAllOrders()" class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md active:scale-95 cursor-pointer">
                         <i class="fa-solid fa-trash text-sm"></i> Azzera 🗑️
@@ -146,7 +146,7 @@
         </header>
         <main class="flex-1 max-w-5xl w-full mx-auto p-4">
             <div class="flex justify-between items-center mb-3">
-                <h2 class="text-xs font-black uppercase tracking-wider text-slate-500">Ordini in tempo reale</h2>
+                <h2 class="text-xs font-black uppercase tracking-wider text-slate-500">Ordini dello spogliatoio in tempo reale</h2>
                 <span class="text-[11px] bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold flex items-center gap-1.5 shadow-2xs">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Firebase Connesso
                 </span>
@@ -709,7 +709,7 @@
         function updateExistingOrder() {
             if(!activeOrderId) return submitOrder();
             
-            // SE IL CARRELLO È STATO SVUOTATO DEL TUTTO, CANCELLA DIRETTAMENTE L'ORDINE SU FIREBASE
+            // SE IL CARRELLO È STATO SVUOTATO COMPLETAMENTE (ANCHE PARTENDO DA 1 SOLO PRODOTTO)
             if(cart.length === 0) {
                 return cancelExistingOrder();
             }
@@ -841,7 +841,7 @@
 
                         cancelledHtml = `
                             <div class="my-2 p-3 bg-red-50 rounded-2xl border border-red-200">
-                                <p class="text-[10px] font-black text-red-700 uppercase tracking-wider mb-1">❌ Prodotti Cancellati dal Cliente:</p>
+                                <p class="text-[10px] font-black text-red-700 uppercase tracking-wider mb-1">❌ Prodotti Cancellati:</p>
                                 ${cancelledList}
                             </div>
                         `;
@@ -909,11 +909,16 @@
                     return alert("Tutti gli ordini presenti sono già stati inviati su WhatsApp!");
                 }
 
-                let text = `*RIEPILOGO ORDINI ASPORTO*%0A`;
+                // MESSAGGIO DI CONFERMA RICHIESTO
+                if (!confirm("Sei sicura che tutti hanno ordinato?")) {
+                    return; // Annulla l'invio se preme Annulla
+                }
+
+                let text = `*RIEPILOGO ORDINI SPOGLIATOIO*%0A`;
                 
                 pendingOrders.forEach(order => {
                     text += `%0A-----------------------------------%0A`;
-                    text += `Cliente: *${order.client}* (${order.time}) ${order.isModified ? '[MODIFICATO]' : ''}%0A`;
+                    text += `Spogliatoio / ${order.client}: *${order.client}* (${order.time}) ${order.isModified ? '[MODIFICATO]' : ''}%0A`;
                     text += `-----------------------------------%0A`;
                     order.items.forEach(i => {
                         text += `• ${i.qty}x ${i.name}%0A`;
